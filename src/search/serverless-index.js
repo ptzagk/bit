@@ -1,10 +1,12 @@
 /** @flow */
 import path from 'path';
 import fs from 'fs-extra';
+import levelup from 'levelup';
 import searchIndex from 'search-index';
+import jsondown from 'jsondown';
 import logger from '../logger/logger';
 
-const indexName = 'search_index';
+const indexName = 'search_index.json';
 const logLevel = 'error';
 let index: Promise<any>;
 
@@ -21,10 +23,13 @@ function deleteDb(scopePath: string) {
 
 async function initializeIndex(scopePath: string): Promise<any> {
   if (!index) {
+    const db = levelup(getIndexPath(scopePath), { db: jsondown });
+
     // static var to make sure the index is not instantiated twice
     const indexOptions = {
       indexPath: getIndexPath(scopePath),
       logLevel,
+      indexes: db,
       stopwords: []
     };
 
